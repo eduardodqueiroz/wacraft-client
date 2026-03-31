@@ -5,6 +5,9 @@ on:
         tags:
             - "v*.*.*"
 
+permissions:
+    contents: write
+
 env:
     IMAGE_NAME: astervia/wacraft-client
 
@@ -52,3 +55,9 @@ jobs:
                     cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}"
                   # latest version signing
                     cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${{ env.IMAGE_NAME }}:latest"
+
+            - name: Publish GitHub release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.vars.outputs.tag }}
+                  generate_release_notes: true
