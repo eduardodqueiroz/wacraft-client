@@ -34,7 +34,7 @@ export const STATUS_ICON_REPOSITORY: Record<string, IMessageStatusIcon> = {
     },
     failed: {
         type: "font",
-        iconClass: "fa fa-exclamation-circle text-xm text-red-600",
+        iconClass: "fa fa-exclamation-circle text-sm text-red-600",
         alt: "Message failed",
     },
 };

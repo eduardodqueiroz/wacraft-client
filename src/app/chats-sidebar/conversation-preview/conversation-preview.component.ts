@@ -11,7 +11,6 @@ import {
     ViewChild,
     inject,
 } from "@angular/core";
-import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { ActivatedRoute, RouterModule } from "@angular/router";
 import {
     Conversation,
@@ -20,10 +19,7 @@ import {
 import { MessageDataPipe } from "../../../core/message/pipe/message-data.pipe";
 import { MessageContentPreviewComponent } from "../../messages/message-content-preview/message-content-preview.component";
 import { QueryParamsService } from "../../../core/navigation/service/query-params.service";
-import {
-    STATUS_ICON_REPOSITORY,
-    IMessageStatusIcon,
-} from "../../common/repository/status-icon.repository";
+import { StatusIconService, ResolvedStatusIcon } from "../../common/service/status-icon.service";
 
 @Component({
     selector: "app-conversation-preview",
@@ -35,7 +31,7 @@ import {
 export class ConversationPreviewComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private queryParamsService = inject(QueryParamsService);
-    private sanitizer = inject(DomSanitizer);
+    private statusIconService = inject(StatusIconService);
 
     /* ---------------- inputs & outputs ---------------- */
     @Input() messagingProductContact!: ConversationMessagingProductContact;
@@ -47,27 +43,9 @@ export class ConversationPreviewComponent implements OnInit {
     @Output() select = new EventEmitter<ConversationMessagingProductContact>();
 
     isSelected = false;
-    private sanitizedIconCache: Record<string, SafeHtml> = {};
 
-    protected getStatusIcon(
-        lastMessage: Conversation,
-    ): (IMessageStatusIcon & { safeSvg?: SafeHtml }) | null {
-        const status = lastMessage?.statuses?.[0]?.product_data?.status;
-        if (!status) return null;
-
-        const rawIcon = STATUS_ICON_REPOSITORY[status];
-        if (!rawIcon) return null;
-
-        if (rawIcon.type === "inline-svg" && rawIcon.svgContent) {
-            if (!this.sanitizedIconCache[status]) {
-                this.sanitizedIconCache[status] = this.sanitizer.bypassSecurityTrustHtml(
-                    rawIcon.svgContent,
-                );
-            }
-            return { ...rawIcon, safeSvg: this.sanitizedIconCache[status] };
-        }
-
-        return rawIcon;
+    protected getStatusIcon(lastMessage: Conversation): ResolvedStatusIcon | null {
+        return this.statusIconService.resolve(lastMessage);
     }
 
     ngOnInit(): void {

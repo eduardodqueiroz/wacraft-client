@@ -1,8 +1,8 @@
-import { CommonModule } from "@angular/common";
-import { Component, HostListener, Input } from "@angular/core";
+import { Component, HostListener, Input, inject } from "@angular/core";
 import { Conversation } from "../../../core/message/model/conversation.model";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { StatusIconService, ResolvedStatusIcon } from "../../common/service/status-icon.service";
 
 @Component({
     selector: "app-message-info",
@@ -16,6 +16,11 @@ export class MessageInfoComponent {
     @Input() sent = true;
 
     showErrorModal = false;
+    private statusIconService = inject(StatusIconService);
+
+    protected getStatusIcon(message: Conversation): ResolvedStatusIcon | null {
+        return this.statusIconService.resolve(message);
+    }
 
     get error() {
         return this.message?.statuses?.[0]?.product_data?.errors?.[0] ?? null;
